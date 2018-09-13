@@ -35,17 +35,22 @@ mse = tf.reduce_mean(tf.square(error), name='mse')
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
 
 # Use Momentum optimizer
-optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=0.9)
+#optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=0.9)
 
 training_op = optimizer.minimize(mse)
 
 init = tf.global_variables_initializer()
 
+saver = tf.train.Saver({'weights' : theta})
+# saver = tf.train.import_meta_graph('./tmp/my_model.clpt.meta')
+
 with tf.Session() as sess:
-    sess.run(init)
+    sess.run(init) # First exec
+    # saver.restore(sess, './tmp/my_model_final.ckpt') # for restore model & var
     for epoch in range(n_epochs):
         if epoch % 100 == 0:
-            print('Epoch', epoch, "MSE =", mse.eval())
+            save_path = saver.save(sess, './tmp/my_model.ckpt')
         sess.run(training_op)
     best_theta = theta.eval()
-    print("best_theta =\n", best_theta)
+    # print("best_theta =\n", best_theta)
+    save_path = saver.save(sess, './tmp/my_model_final.ckpt')
